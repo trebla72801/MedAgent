@@ -206,37 +206,62 @@ async def generate_welcome_message(session_id: str):
     # Get user profile
     profile = await db.user_profiles.find_one({"session_id": session_id})
     
+    # Get language from profile, default to Italian
+    language = profile.get('language', 'it') if profile else 'it'
+    
     if not profile:
-        welcome_msg = "Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Come posso aiutarti oggi?"
+        welcome_msg = {
+            'it': "Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Come posso aiutarti oggi?",
+            'en': "Hello! I'm MedAgent, your digital health assistant. How can I help you today?"
+        }[language]
     else:
         # Personalized welcome based on profile
         eta = profile.get('eta', '')
         sintomo = profile.get('sintomo_principale', '')
         
         if sintomo:
-            welcome_msg = f"Ciao! Ho visto che hai menzionato '{sintomo}'. Sono qui per aiutarti a capire meglio come stai. Puoi raccontarmi di più su quello che stai vivendo?"
+            welcome_msg = {
+                'it': f"Ciao! Ho visto che hai menzionato '{sintomo}'. Sono qui per aiutarti a capire meglio come stai. Puoi raccontarmi di più su quello che stai vivendo?",
+                'en': f"Hello! I saw you mentioned '{sintomo}'. I'm here to help you better understand how you're feeling. Can you tell me more about what you're experiencing?"
+            }[language]
         elif eta:
-            welcome_msg = f"Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Sono qui per aiutarti con le tue domande sulla salute. Cosa ti preoccupa oggi?"
+            welcome_msg = {
+                'it': f"Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Sono qui per aiutarti con le tue domande sulla salute. Cosa ti preoccupa oggi?",
+                'en': f"Hello! I'm MedAgent, your digital health assistant. I'm here to help you with your health questions. What's concerning you today?"
+            }[language]
         else:
-            welcome_msg = "Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Come posso aiutarti oggi?"
+            welcome_msg = {
+                'it': "Ciao! Sono MedAgent, il tuo assistente sanitario digitale. Come posso aiutarti oggi?",
+                'en': "Hello! I'm MedAgent, your digital health assistant. How can I help you today?"
+            }[language]
+    
+    # Generate next questions based on language
+    next_questions = {
+        'it': [
+            "Puoi descrivermi il sintomo che ti preoccupa?",
+            "Da quando hai notato questo problema?",
+            "C'è qualcos'altro che ti fa stare male?"
+        ],
+        'en': [
+            "Can you describe the symptom that's worrying you?",
+            "When did you first notice this problem?",
+            "Is there anything else that's making you feel unwell?"
+        ]
+    }[language]
     
     # Save welcome message
     message = Message(
         session_id=session_id,
         message_type="assistant",
         content=welcome_msg,
-        next_questions=[
-            "Puoi descrivermi il sintomo che ti preoccupa?",
-            "Da quando hai notato questo problema?",
-            "C'è qualcos'altro che ti fa stare male?"
-        ]
+        next_questions=next_questions
     )
     
     await db.messages.insert_one(message.dict())
     
     return {
         "message": welcome_msg,
-        "next_questions": message.next_questions,
+        "next_questions": next_questions,
         "urgency_level": "low"
     }
 
