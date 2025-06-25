@@ -67,6 +67,7 @@ class UserProfile(BaseModel):
     sintomi_associati: List[str] = []
     condizioni_note: List[str] = []
     familiarita: Optional[str] = None
+    language: Optional[str] = "it"  # Default to Italian
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
