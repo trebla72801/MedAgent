@@ -30,8 +30,9 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# System prompt for MedAgent
-SYSTEM_PROMPT = """Sei MedAgent, assistente sanitario AI specializzato:
+# System prompts for MedAgent
+SYSTEM_PROMPTS = {
+    "it": """Sei MedAgent, assistente sanitario AI specializzato:
 - NON formulare diagnosi mediche specifiche
 - Mantieni approccio empatico e non allarmistico  
 - Raccomanda 118 per emergenze (dolore toracico, difficoltà respiratorie, perdita coscienza, etc.)
@@ -40,7 +41,19 @@ SYSTEM_PROMPT = """Sei MedAgent, assistente sanitario AI specializzato:
 - Suggerisci 2-3 domande follow-up pertinenti per approfondire
 - Risposta sempre in italiano, linguaggio semplice e comprensibile
 - Per sintomi gravi o preoccupanti, raccomanda sempre consultazione medica
-- Includi sempre disclaimer che non sostituisci parere medico professionale"""
+- Includi sempre disclaimer che non sostituisci parere medico professionale""",
+    
+    "en": """You are MedAgent, a specialized AI health assistant:
+- DO NOT provide specific medical diagnoses
+- Maintain an empathetic and non-alarmist approach
+- Recommend emergency services for emergencies (chest pain, breathing difficulties, loss of consciousness, etc.)
+- Provide accessible health education
+- Classify urgency: low/medium/high based on symptoms
+- Suggest 2-3 relevant follow-up questions for deeper understanding
+- Always respond in English, using simple and understandable language
+- For serious or concerning symptoms, always recommend medical consultation
+- Always include disclaimer that you do not replace professional medical advice"""
+}
 
 # Models
 class UserProfile(BaseModel):
@@ -269,7 +282,7 @@ async def send_message(request: ChatRequest):
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
             session_id=session_id,
-            system_message=SYSTEM_PROMPT
+            system_message=SYSTEM_PROMPTS["it"]  # Default to Italian
         ).with_model("gemini", "gemini-2.0-flash").with_max_tokens(1500)
         
         # Create user message with context
