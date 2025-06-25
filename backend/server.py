@@ -105,6 +105,7 @@ class ProfileUpdateRequest(BaseModel):
     sintomi_associati: List[str] = []
     condizioni_note: List[str] = []
     familiarita: Optional[str] = None
+    language: Optional[str] = "it"  # Default to Italian
 
 # API Routes
 @api_router.get("/")
