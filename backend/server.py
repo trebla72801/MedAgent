@@ -133,6 +133,11 @@ async def get_session(session_id: str):
     # Get profile if exists
     profile = await db.user_profiles.find_one({"session_id": session_id})
     
+    # Convert MongoDB objects to JSON serializable format
+    session = json.loads(json_util.dumps(session))
+    if profile:
+        profile = json.loads(json_util.dumps(profile))
+    
     return {
         "session": session,
         "profile": profile
