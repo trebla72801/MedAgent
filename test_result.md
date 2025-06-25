@@ -257,3 +257,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Completed building entire MedAgent application from scratch. Backend has FastAPI with Gemini AI integration using emergentintegrations library, complete session/profile management, MongoDB integration. Frontend is complete React app with multi-step form, chat interface, results page, language switching. Ready for comprehensive testing of all functionality, starting with backend APIs then frontend user flow."
+  - agent: "testing"
+    message: "Completed comprehensive testing of all backend APIs. Initially encountered issues with MongoDB ObjectId serialization which were fixed by using json_util from bson package. Also fixed a datetime handling issue in the session summary endpoint. All backend APIs are now working correctly including health check, session management, profile management, chat with AI, and session summary. The Gemini AI integration is working properly with the provided API key and responds appropriately in Italian with medical advice. The urgency detection system correctly identifies low/medium/high urgency levels based on symptoms."
