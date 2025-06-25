@@ -159,6 +159,8 @@ async def create_or_update_profile(session_id: str, profile_data: ProfileUpdateR
         )
         
         updated_profile = await db.user_profiles.find_one({"session_id": session_id})
+        # Convert MongoDB object to JSON serializable format
+        updated_profile = json.loads(json_util.dumps(updated_profile))
         return {"status": "updated", "profile": updated_profile}
     else:
         # Create new profile
