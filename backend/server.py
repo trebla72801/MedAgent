@@ -178,6 +178,10 @@ async def get_profile(session_id: str):
     profile = await db.user_profiles.find_one({"session_id": session_id})
     if not profile:
         return {"profile": None}
+    
+    # Convert MongoDB object to JSON serializable format
+    profile = json.loads(json_util.dumps(profile))
+    
     return {"profile": profile}
 
 @api_router.post("/chat/welcome/{session_id}")
