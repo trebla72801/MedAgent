@@ -372,6 +372,12 @@ async def get_session_summary(session_id: str):
         {"session_id": session_id}
     ).sort("timestamp", 1).to_list(length=None)
     
+    # Convert MongoDB objects to JSON serializable format
+    session = json.loads(json_util.dumps(session))
+    if profile:
+        profile = json.loads(json_util.dumps(profile))
+    messages = json.loads(json_util.dumps(messages))
+    
     # Count messages by type
     user_messages = len([m for m in messages if m["message_type"] == "user"])
     assistant_messages = len([m for m in messages if m["message_type"] == "assistant"])
@@ -384,7 +390,7 @@ async def get_session_summary(session_id: str):
         "session_info": {
             "session_id": session_id,
             "start_time": session["start_time"],
-            "duration_minutes": (datetime.utcnow() - session["start_time"]).total_seconds() / 60,
+            "duration_minutes": (datetime.utcnow() - datetime.fromisoformat(session["start_time"]["$date"].replace("Z", "+00:00"))).total_seconds() / 60,
             "status": session["status"]
         },
         "conversation_stats": {
