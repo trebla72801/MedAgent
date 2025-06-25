@@ -352,6 +352,9 @@ async def get_chat_history(session_id: str):
         {"session_id": session_id}
     ).sort("timestamp", 1).to_list(length=None)
     
+    # Convert MongoDB objects to JSON serializable format
+    messages = json.loads(json_util.dumps(messages))
+    
     return {"messages": messages}
 
 @api_router.get("/chat/summary/{session_id}")
