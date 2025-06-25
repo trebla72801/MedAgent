@@ -20,7 +20,9 @@ import {
   AlertCircle,
   Clock,
   Star,
-  Activity
+  Activity,
+  X,
+  Check
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -89,7 +91,45 @@ const translations = {
     shareResults: 'Condividi risultati',
     newEvaluation: 'Nuova valutazione',
     medicalDisclaimer: '⚠️ Questo strumento non sostituisce il parere medico professionale. In caso di emergenza, contatta immediatamente il 118.',
-    language: 'Lingua'
+    language: 'Lingua',
+    evaluationForm: 'Valutazione iniziale',
+    selectAge: 'Seleziona età',
+    selectGender: 'Seleziona genere',
+    selectDuration: 'Seleziona durata',
+    symptomPlaceholder: 'Es: mal di testa, febbre, dolore addominale...',
+    familyHistoryPlaceholder: 'Descrivi eventuali malattie familiari rilevanti...',
+    processing: 'Elaborazione...',
+    profile: 'Profilo',
+    notSpecified: 'Non specificato',
+    symptom: 'Sintomo',
+    consultation: 'Consultazione MedAgent',
+    seeResults: 'Vedi risultati',
+    loadingResults: 'Caricamento risultati...',
+    consultationDuration: 'Durata consultazione',
+    exchangedMessages: 'Messaggi scambiati',
+    sessionData: 'Dati della sessione',
+    sessionId: 'Session ID',
+    sessionStart: 'Inizio sessione',
+    sessionDuration: 'Durata',
+    sessionStatus: 'Status',
+    conversationStats: 'Statistiche conversazione',
+    userMessages: 'Messaggi utente',
+    assistantMessages: 'Risposte assistente',
+    maxUrgencyLevel: 'Livello urgenza massimo',
+    patientProfile: 'Profilo paziente',
+    thinking: 'MedAgent sta pensando...',
+    writeMessage: 'Scrivi il tuo messaggio...',
+    gdprConsent: 'Consenso GDPR',
+    gdprTitle: 'Consenso al trattamento dei dati personali',
+    gdprText: 'Prima di procedere, devi accettare i nostri termini per il trattamento dei dati secondo il GDPR. I tuoi dati saranno trattati in modo anonimo e sicuro, non verranno mai condivisi con terze parti e potrai cancellarli in qualsiasi momento.',
+    iAccept: 'Accetto',
+    readPrivacy: 'Leggi l\'informativa privacy completa',
+    acceptTerms: 'Accetto i termini e condizioni',
+    acceptPrivacy: 'Accetto l\'informativa sulla privacy',
+    acceptGdpr: 'Accetto il trattamento dei dati secondo GDPR',
+    consentRequired: 'Devi accettare tutti i consensi per procedere',
+    aboutUsTitle: 'Chi siamo',
+    privacyTitle: 'Privacy e Sicurezza'
   },
   en: {
     title: 'MEDAGENTbyTREBLA',
@@ -137,8 +177,46 @@ const translations = {
     exportPDF: 'Export PDF',
     shareResults: 'Share results',
     newEvaluation: 'New evaluation',
-    medicalDisclaimer: '⚠️ This tool does not replace professional medical advice. In case of emergency, immediately contact 118.',
-    language: 'Language'
+    medicalDisclaimer: '⚠️ This tool does not replace professional medical advice. In case of emergency, immediately contact emergency services.',
+    language: 'Language',
+    evaluationForm: 'Initial evaluation',
+    selectAge: 'Select age',
+    selectGender: 'Select gender',
+    selectDuration: 'Select duration',
+    symptomPlaceholder: 'E.g.: headache, fever, abdominal pain...',
+    familyHistoryPlaceholder: 'Describe any relevant family medical conditions...',
+    processing: 'Processing...',
+    profile: 'Profile',
+    notSpecified: 'Not specified',
+    symptom: 'Symptom',
+    consultation: 'MedAgent Consultation',
+    seeResults: 'View results',
+    loadingResults: 'Loading results...',
+    consultationDuration: 'Consultation duration',
+    exchangedMessages: 'Messages exchanged',
+    sessionData: 'Session data',
+    sessionId: 'Session ID',
+    sessionStart: 'Session start',
+    sessionDuration: 'Duration',
+    sessionStatus: 'Status',
+    conversationStats: 'Conversation statistics',
+    userMessages: 'User messages',
+    assistantMessages: 'Assistant responses',
+    maxUrgencyLevel: 'Maximum urgency level',
+    patientProfile: 'Patient profile',
+    thinking: 'MedAgent is thinking...',
+    writeMessage: 'Write your message...',
+    gdprConsent: 'GDPR Consent',
+    gdprTitle: 'Personal Data Processing Consent',
+    gdprText: 'Before proceeding, you must accept our terms for data processing according to GDPR. Your data will be processed anonymously and securely, never shared with third parties, and you can delete it at any time.',
+    iAccept: 'I Accept',
+    readPrivacy: 'Read full privacy policy',
+    acceptTerms: 'I accept the terms and conditions',
+    acceptPrivacy: 'I accept the privacy policy',
+    acceptGdpr: 'I accept GDPR data processing',
+    consentRequired: 'You must accept all consents to proceed',
+    aboutUsTitle: 'About Us',
+    privacyTitle: 'Privacy & Data Protection'
   }
 };
 
@@ -159,6 +237,91 @@ const useLanguage = () => {
     throw new Error('useLanguage must be used within LanguageProvider');
   }
   return context;
+};
+
+// GDPR Consent Modal
+const GDPRConsent = ({ isOpen, onAccept }) => {
+  const { t, language } = useLanguage();
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [acceptGdpr, setAcceptGdpr] = useState(false);
+
+  const handleAccept = () => {
+    if (acceptTerms && acceptPrivacy && acceptGdpr) {
+      localStorage.setItem('medagent_gdpr_consent', 'true');
+      onAccept();
+    } else {
+      alert(t.consentRequired);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <Shield className="w-6 h-6 mr-2 text-blue-600" />
+            {t.gdprTitle}
+          </h2>
+          
+          <div className="space-y-4 text-gray-700">
+            <p>{t.gdprText}</p>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">{t.medicalDisclaimer}</h3>
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm">{t.acceptTerms}</span>
+              </label>
+
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptPrivacy}
+                  onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm">
+                  {t.acceptPrivacy} - <Link to="/privacy" className="text-blue-600 hover:underline">{t.readPrivacy}</Link>
+                </span>
+              </label>
+
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptGdpr}
+                  onChange={(e) => setAcceptGdpr(e.target.checked)}
+                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm">{t.acceptGdpr}</span>
+              </label>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                onClick={handleAccept}
+                disabled={!acceptTerms || !acceptPrivacy || !acceptGdpr}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                {t.iAccept}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Language Switcher Component
@@ -184,6 +347,7 @@ const LanguageSwitcher = () => {
 const HomePage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [showGDPRModal, setShowGDPRModal] = useState(false);
   
   const features = [
     {
@@ -208,6 +372,20 @@ const HomePage = () => {
     }
   ];
 
+  const handleStartEvaluation = () => {
+    const consent = localStorage.getItem('medagent_gdpr_consent');
+    if (!consent) {
+      setShowGDPRModal(true);
+    } else {
+      navigate('/valutazione');
+    }
+  };
+
+  const handleGDPRAccept = () => {
+    setShowGDPRModal(false);
+    navigate('/valutazione');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Hero Section */}
@@ -222,7 +400,7 @@ const HomePage = () => {
               {t.heroSubtitle}
             </p>
             <button
-              onClick={() => navigate('/valutazione')}
+              onClick={handleStartEvaluation}
               className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center mx-auto"
             >
               {t.startEvaluation}
@@ -256,6 +434,8 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      <GDPRConsent isOpen={showGDPRModal} onAccept={handleGDPRAccept} />
     </div>
   );
 };
@@ -263,7 +443,7 @@ const HomePage = () => {
 // Evaluation Form Page
 const EvaluationPage = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -274,18 +454,36 @@ const EvaluationPage = () => {
     }
   });
 
-  const sintomiAssociati = [
+  // Check GDPR consent
+  useEffect(() => {
+    const consent = localStorage.getItem('medagent_gdpr_consent');
+    if (!consent) {
+      navigate('/');
+    }
+  }, [navigate]);
+
+  const sintomiAssociati = language === 'it' ? [
     'Febbre', 'Mal di testa', 'Nausea', 'Vomito', 'Vertigini', 
     'Debolezza', 'Dolore addominale', 'Difficoltà respiratorie', 
     'Tosse', 'Mal di gola', 'Diarrea', 'Stitichezza',
     'Dolore muscolare', 'Dolore articolare', 'Perdita appetito',
     'Insonnia', 'Ansia', 'Palpitazioni', 'Sudorazione'
+  ] : [
+    'Fever', 'Headache', 'Nausea', 'Vomiting', 'Dizziness',
+    'Weakness', 'Abdominal pain', 'Breathing difficulties',
+    'Cough', 'Sore throat', 'Diarrhea', 'Constipation',
+    'Muscle pain', 'Joint pain', 'Loss of appetite',
+    'Insomnia', 'Anxiety', 'Palpitations', 'Sweating'
   ];
 
-  const condizioniNote = [
+  const condizioniNote = language === 'it' ? [
     'Diabete', 'Ipertensione', 'Asma', 'Allergie', 'Ipotiroidismo',
     'Ipertiroidismo', 'Malattie cardiache', 'Depressione', 'Ansia',
     'Artrite', 'Osteoporosi', 'Nessuna condizione nota'
+  ] : [
+    'Diabetes', 'Hypertension', 'Asthma', 'Allergies', 'Hypothyroidism',
+    'Hyperthyroidism', 'Heart disease', 'Depression', 'Anxiety',
+    'Arthritis', 'Osteoporosis', 'No known conditions'
   ];
 
   const onSubmit = async (data) => {
@@ -302,7 +500,7 @@ const EvaluationPage = () => {
       navigate(`/chat/${sessionId}`);
     } catch (error) {
       console.error('Error creating session:', error);
-      alert('Errore nella creazione della sessione. Riprova.');
+      alert(language === 'it' ? 'Errore nella creazione della sessione. Riprova.' : 'Error creating session. Please try again.');
     }
     setIsSubmitting(false);
   };
@@ -312,7 +510,7 @@ const EvaluationPage = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Valutazione iniziale
+            {t.evaluationForm}
           </h1>
           
           {/* Medical Disclaimer */}
@@ -331,13 +529,13 @@ const EvaluationPage = () => {
                   {t.age} *
                 </label>
                 <select {...register('eta')} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Seleziona età</option>
-                  <option value="<12">Meno di 12 anni</option>
-                  <option value="12-18">12-18 anni</option>
-                  <option value="19-30">19-30 anni</option>
-                  <option value="31-50">31-50 anni</option>
-                  <option value="51-70">51-70 anni</option>
-                  <option value=">70">Oltre 70 anni</option>
+                  <option value="">{t.selectAge}</option>
+                  <option value="<12">{language === 'it' ? 'Meno di 12 anni' : 'Under 12 years'}</option>
+                  <option value="12-18">{language === 'it' ? '12-18 anni' : '12-18 years'}</option>
+                  <option value="19-30">{language === 'it' ? '19-30 anni' : '19-30 years'}</option>
+                  <option value="31-50">{language === 'it' ? '31-50 anni' : '31-50 years'}</option>
+                  <option value="51-70">{language === 'it' ? '51-70 anni' : '51-70 years'}</option>
+                  <option value=">70">{language === 'it' ? 'Oltre 70 anni' : 'Over 70 years'}</option>
                 </select>
               </div>
 
@@ -346,7 +544,7 @@ const EvaluationPage = () => {
                   {t.gender}
                 </label>
                 <select {...register('genere')} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Seleziona genere</option>
+                  <option value="">{t.selectGender}</option>
                   <option value="maschio">{t.male}</option>
                   <option value="femmina">{t.female}</option>
                   <option value="altro">{t.other}</option>
@@ -363,7 +561,7 @@ const EvaluationPage = () => {
               <input
                 {...register('sintomo_principale')}
                 type="text"
-                placeholder="Es: mal di testa, febbre, dolore addominale..."
+                placeholder={t.symptomPlaceholder}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.sintomo_principale && (
@@ -378,7 +576,7 @@ const EvaluationPage = () => {
                   {t.duration}
                 </label>
                 <select {...register('durata')} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Seleziona durata</option>
+                  <option value="">{t.selectDuration}</option>
                   <option value="1_giorno">{t.oneDay}</option>
                   <option value="2-3_giorni">{t.twoDays}</option> 
                   <option value="3+_giorni">{t.moreThanThreeDays}</option>
@@ -452,7 +650,7 @@ const EvaluationPage = () => {
               <textarea
                 {...register('familiarita')}
                 rows="3"
-                placeholder="Descrivi eventuali malattie familiari rilevanti..."
+                placeholder={t.familyHistoryPlaceholder}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -467,7 +665,7 @@ const EvaluationPage = () => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin mr-2 w-5 h-5" />
-                    Elaborazione...
+                    {t.processing}
                   </>
                 ) : (
                   <>
@@ -612,28 +810,28 @@ const ChatPage = () => {
             <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <User className="w-5 h-5 mr-2 text-blue-600" />
-                Profilo
+                {t.profile}
               </h3>
               
               {profile && (
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="font-medium text-gray-700">Età:</span>
-                    <span className="text-gray-600 ml-2">{profile.eta || 'Non specificato'}</span>
+                    <span className="font-medium text-gray-700">{t.age}:</span>
+                    <span className="text-gray-600 ml-2">{profile.eta || t.notSpecified}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">Genere:</span>
-                    <span className="text-gray-600 ml-2">{profile.genere || 'Non specificato'}</span>
+                    <span className="font-medium text-gray-700">{t.gender}:</span>
+                    <span className="text-gray-600 ml-2">{profile.genere || t.notSpecified}</span>
                   </div>
                   {profile.sintomo_principale && (
                     <div>
-                      <span className="font-medium text-gray-700">Sintomo:</span>
+                      <span className="font-medium text-gray-700">{t.symptom}:</span>
                       <span className="text-gray-600 ml-2">{profile.sintomo_principale}</span>
                     </div>
                   )}
                   {profile.durata && (
                     <div>
-                      <span className="font-medium text-gray-700">Durata:</span>
+                      <span className="font-medium text-gray-700">{t.duration}:</span>
                       <span className="text-gray-600 ml-2">{profile.durata}</span>
                     </div>
                   )}
@@ -646,7 +844,7 @@ const ChatPage = () => {
                   <div className="flex items-center justify-center mb-1">
                     {getUrgencyIcon(currentUrgencyLevel)}
                     <span className="ml-2 font-medium text-sm">
-                      Livello urgenza: {currentUrgencyLevel.toUpperCase()}
+                      {t.urgencyLevel}: {currentUrgencyLevel.toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -659,13 +857,13 @@ const ChatPage = () => {
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Vedi risultati
+                  {t.seeResults}
                 </button>
                 <button
                   onClick={() => navigate('/')}
                   className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
                 >
-                  Nuova valutazione
+                  {t.newEvaluation}
                 </button>
               </div>
             </div>
@@ -678,7 +876,7 @@ const ChatPage = () => {
               <div className="border-b border-gray-200 p-6">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center">
                   <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
-                  Consultazione MedAgent
+                  {t.consultation}
                 </h2>
               </div>
 
@@ -720,7 +918,7 @@ const ChatPage = () => {
                   <div className="flex justify-start">
                     <div className="bg-gray-100 border border-gray-200 rounded-lg px-4 py-2 flex items-center space-x-2">
                       <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                      <span className="text-gray-600 text-sm">MedAgent sta pensando...</span>
+                      <span className="text-gray-600 text-sm">{t.thinking}</span>
                     </div>
                   </div>
                 )}
@@ -736,7 +934,7 @@ const ChatPage = () => {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Scrivi il tuo messaggio..."
+                    placeholder={t.writeMessage}
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={isLoading}
                   />
@@ -764,7 +962,7 @@ const ResultsPage = () => {
   const [activeTab, setActiveTab] = useState('user');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const loadSummary = async () => {
@@ -788,7 +986,7 @@ const ResultsPage = () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Risultati MedAgent</title>
+          <title>${language === 'it' ? 'Risultati MedAgent' : 'MedAgent Results'}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 40px; }
             .header { text-align: center; margin-bottom: 40px; }
@@ -800,18 +998,18 @@ const ResultsPage = () => {
         </head>
         <body>
           <div class="header">
-            <h1>Risultati MedAgent</h1>
+            <h1>${language === 'it' ? 'Risultati MedAgent' : 'MedAgent Results'}</h1>
             <p>Session ID: ${sessionId}</p>
           </div>
           ${summary ? `
             <div class="section">
-              <h2>Riassunto sessione</h2>
-              <p><strong>Durata:</strong> ${Math.round(summary.session_info.duration_minutes)} minuti</p>
-              <p><strong>Messaggi totali:</strong> ${summary.conversation_stats.total_messages}</p>
-              <p><strong>Livello urgenza:</strong> <span class="urgency-${summary.recommendations.urgency_level}">${summary.recommendations.urgency_level.toUpperCase()}</span></p>
+              <h2>${t.sessionSummary}</h2>
+              <p><strong>${t.sessionDuration}:</strong> ${Math.round(summary.session_info.duration_minutes)} ${language === 'it' ? 'minuti' : 'minutes'}</p>
+              <p><strong>${t.exchangedMessages}:</strong> ${summary.conversation_stats.total_messages}</p>
+              <p><strong>${t.urgencyLevel}:</strong> <span class="urgency-${summary.recommendations.urgency_level}">${summary.recommendations.urgency_level.toUpperCase()}</span></p>
             </div>
             <div class="section">
-              <h2>Raccomandazioni</h2>
+              <h2>${t.recommendations}</h2>
               <p>${summary.recommendations.next_steps}</p>
             </div>
           ` : ''}
@@ -826,8 +1024,8 @@ const ResultsPage = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Risultati MedAgent',
-          text: `Risultati della consultazione MedAgent - Livello urgenza: ${summary?.recommendations.urgency_level}`,
+          title: language === 'it' ? 'Risultati MedAgent' : 'MedAgent Results',
+          text: `${language === 'it' ? 'Risultati della consultazione MedAgent - Livello urgenza:' : 'MedAgent consultation results - Urgency level:'} ${summary?.recommendations.urgency_level}`,
           url: window.location.href
         });
       } catch (error) {
@@ -836,7 +1034,7 @@ const ResultsPage = () => {
     } else {
       // Fallback - copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copiato negli appunti!');
+      alert(language === 'it' ? 'Link copiato negli appunti!' : 'Link copied to clipboard!');
     }
   };
 
@@ -845,7 +1043,7 @@ const ResultsPage = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-          <p className="text-gray-600 mt-2">Caricamento risultati...</p>
+          <p className="text-gray-600 mt-2">{t.loadingResults}</p>
         </div>
       </div>
     );
@@ -911,13 +1109,13 @@ const ResultsPage = () => {
               {/* Session Summary */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Durata consultazione</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{t.consultationDuration}</h4>
                   <p className="text-2xl font-bold text-gray-700">
-                    {Math.round(summary.session_info.duration_minutes)} min
+                    {Math.round(summary.session_info.duration_minutes)} {language === 'it' ? 'min' : 'min'}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Messaggi scambiati</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{t.exchangedMessages}</h4>
                   <p className="text-2xl font-bold text-gray-700">
                     {summary.conversation_stats.total_messages}
                   </p>
@@ -929,33 +1127,33 @@ const ResultsPage = () => {
           {activeTab === 'technical' && summary && (
             <div className="space-y-6">
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Dati della sessione</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t.sessionData}</h3>
                 <div className="space-y-2 text-sm">
-                  <div><strong>Session ID:</strong> {summary.session_info.session_id}</div>
-                  <div><strong>Inizio sessione:</strong> {new Date(summary.session_info.start_time).toLocaleString()}</div>
-                  <div><strong>Durata:</strong> {Math.round(summary.session_info.duration_minutes)} minuti</div>
-                  <div><strong>Status:</strong> {summary.session_info.status}</div>
+                  <div><strong>{t.sessionId}:</strong> {summary.session_info.session_id}</div>
+                  <div><strong>{t.sessionStart}:</strong> {new Date(summary.session_info.start_time).toLocaleString()}</div>
+                  <div><strong>{t.sessionDuration}:</strong> {Math.round(summary.session_info.duration_minutes)} {language === 'it' ? 'minuti' : 'minutes'}</div>
+                  <div><strong>{t.sessionStatus}:</strong> {summary.session_info.status}</div>
                 </div>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Statistiche conversazione</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t.conversationStats}</h3>
                 <div className="space-y-2 text-sm">
-                  <div><strong>Messaggi utente:</strong> {summary.conversation_stats.user_messages}</div>
-                  <div><strong>Risposte assistente:</strong> {summary.conversation_stats.assistant_messages}</div>
-                  <div><strong>Livello urgenza massimo:</strong> {summary.conversation_stats.max_urgency_level}</div>
+                  <div><strong>{t.userMessages}:</strong> {summary.conversation_stats.user_messages}</div>
+                  <div><strong>{t.assistantMessages}:</strong> {summary.conversation_stats.assistant_messages}</div>
+                  <div><strong>{t.maxUrgencyLevel}:</strong> {summary.conversation_stats.max_urgency_level}</div>
                 </div>
               </div>
 
               {summary.profile_summary && (
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Profilo paziente</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">{t.patientProfile}</h3>
                   <div className="space-y-2 text-sm">
-                    <div><strong>Età:</strong> {summary.profile_summary.eta || 'Non specificato'}</div>
-                    <div><strong>Genere:</strong> {summary.profile_summary.genere || 'Non specificato'}</div>
-                    <div><strong>Sintomo principale:</strong> {summary.profile_summary.sintomo_principale || 'Non specificato'}</div>
+                    <div><strong>{t.age}:</strong> {summary.profile_summary.eta || t.notSpecified}</div>
+                    <div><strong>{t.gender}:</strong> {summary.profile_summary.genere || t.notSpecified}</div>
+                    <div><strong>{t.mainSymptom}:</strong> {summary.profile_summary.sintomo_principale || t.notSpecified}</div>
                     {summary.profile_summary.condizioni_note?.length > 0 && (
-                      <div><strong>Condizioni note:</strong> {summary.profile_summary.condizioni_note.join(', ')}</div>
+                      <div><strong>{t.knownConditions}:</strong> {summary.profile_summary.condizioni_note.join(', ')}</div>
                     )}
                   </div>
                 </div>
@@ -985,6 +1183,80 @@ const ResultsPage = () => {
             >
               {t.newEvaluation}
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// About Us Page
+const AboutPage = () => {
+  const { t, language } = useLanguage();
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            {t.aboutUsTitle}
+          </h1>
+          
+          <div className="prose max-w-none text-gray-700 leading-relaxed">
+            {language === 'it' ? (
+              <div>
+                <p>Nel quadro attuale, segnato da una convergenza di criticità che mettono sotto pressione i sistemi sanitari – dall'invecchiamento demografico all'aumento della complessità clinica e alla disomogeneità dei servizi – emerge l'urgenza di strumenti digitali semplici ma efficaci.</p>
+                
+                <p>MedAgent nasce proprio per rispondere a questa necessità. Non è un sintomi checker generico, ma un assistente conversazionale AI, progettato per accompagnare l'utente in un processo di autovalutazione strutturato, guidato e contestuale.</p>
+                
+                <p>È pensato per chi non ha risposte immediate: studenti, lavoratori, migranti, famiglie. MedAgent fonde intelligenza artificiale, design etico e accessibilità reale per restituire orientamento e comprensione, senza offrire diagnosi, ma strumenti utili per leggere i segnali del proprio corpo con più lucidità e meno ansia.</p>
+              </div>
+            ) : (
+              <div>
+                <p>In today's healthcare landscape – shaped by growing demographic pressures, rising chronic conditions, and fragmented access to care – there's a clear need for intelligent, accessible tools that help people navigate uncertainty.</p>
+                
+                <p>MedAgent was built to meet this need. It's not a generic symptom checker, but a new kind of conversational assistant powered by AI, designed to guide users through structured, responsive self-assessment experiences.</p>
+                
+                <p>It's built for students, workers, parents, migrants—anyone who feels lost when trying to understand their own symptoms. MedAgent combines artificial intelligence, ethical design, and real-world usability to deliver clarity without pretending to diagnose. Just support, insight, and a way forward.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Privacy Page
+const PrivacyPage = () => {
+  const { t, language } = useLanguage();
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            {t.privacyTitle}
+          </h1>
+          
+          <div className="prose max-w-none text-gray-700 leading-relaxed">
+            {language === 'it' ? (
+              <div>
+                <p>MedAgent è progettato con un approccio "privacy by design". Non raccogliamo dati personali identificativi. Tutte le informazioni inserite durante l'uso restano temporanee, pseudonimizzate e non vengono associate a nomi, email o identità.</p>
+                
+                <p>Le sessioni sono anonime, criptate e gestite in locale o su server sicuri. Puoi cancellare i dati in qualsiasi momento, e nessuna informazione viene condivisa con terze parti per fini commerciali.</p>
+                
+                <p>MedAgent rispetta pienamente il GDPR e non utilizza cookie di tracciamento.</p>
+              </div>
+            ) : (
+              <div>
+                <p>MedAgent is built with a strict privacy-first approach. No personal identifiers are collected. All data is temporary, pseudonymized, and never linked to names, emails, or accounts.</p>
+                
+                <p>Sessions are anonymous, encrypted, and handled locally or via secure servers. Users can delete their data anytime, and no information is shared with third parties for advertising.</p>
+                
+                <p>MedAgent is fully GDPR-compliant and uses no tracking cookies.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1052,6 +1324,8 @@ const App = () => {
               <Route path="/valutazione" element={<EvaluationPage />} />
               <Route path="/chat/:sessionId" element={<ChatPage />} />
               <Route path="/risultato/:sessionId" element={<ResultsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
             </Routes>
           </main>
           <Footer />
